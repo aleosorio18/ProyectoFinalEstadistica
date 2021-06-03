@@ -1,0 +1,517 @@
+---
+title: "EXPLORACION DE DATOS"
+author: "María Alejandra Osorio Alvarado 2490-19-2838 / Samuel Rolando Martinez Lopez 2490-19-17930"
+date: "1/6/2021"
+output: word_document
+---
+
+#ANALISIS DE DATOS DE LA APPLE STORE Y DE COCHES USADOS
+
+#CARGAR LIBRERIAS
+
+```{r}
+require(stats)
+library(dplyr)
+library(ggplot2)
+library(corrplot)
+library(lubridate)
+library(forecast)
+library(tidyverse)
+```
+
+#CARGAR DATASETS
+
+```{r}
+AppleStore <- read.csv("~/PROYECTO DE ESTADISTICA 2/AppleStore.csv", stringsAsFactors=TRUE)
+coches.de.segunda.mano.sample <- read.csv("~/PROYECTO DE ESTADISTICA 2/coches-de-segunda-mano-sample.csv", stringsAsFactors=TRUE)
+```
+
+```{r}
+summary(AppleStore)
+```
+```{r}
+summary(coches.de.segunda.mano.sample)
+```
+
+
+#ANALISIS DE LA APPLE STORE
+
+#ANALISIS 1: Existe una posible relación entre las variables peso de la aplicacion (size_bytes) y  la calificacion de los usuarios (user_rating).
+
+#2 VARIABLES CUANTITATIVAS
+#size_bytes
+#user_rating
+
+#GRAFICO DE CORRELACION
+
+#H0: existe una buena correlacion entre las variables
+#H1. no existe una buena correlacion entre las dos variables
+
+```{r}
+plot(AppleStore$size_bytes, AppleStore$user_rating,col="blue",main="Correlacion",xlab="size_bytes",ylab="user_rating")
+modelo1 <- lm(AppleStore$user_rating ~ AppleStore$size_bytes)
+
+abline(modelo1,col="red")
+```
+
+#CONCLUSION: se puede observar que tiene una mala correlacion entre el peso de la app y la calificacion del usuario esto se da a que mientras mas pesada sea la app el usuario consumira mas espacio en su dispositivo esto afecta en la calificacion que se le da a la app, asi que por ende rechazamos la hipotesis nula y afirmamos la alternativa.
+
+#ANALISIS 2: Existe una diferencia con el precio y cont_rating.
+
+#"cont_rating"  #CUALITATIVA
+#"price" #CUANTITATIVA
+
+#H0: si existe una diferencia en el precio y cont_rating
+#H1: no existe diferencia en el precio y cont_rating 
+
+```{r}
+ggplot(data= AppleStore,aes(x=cont_rating,y=price,color=cont_rating))+geom_boxplot()+theme_bw()
+
+anova<-aov(AppleStore$price~ AppleStore$cont_rating)
+summary(anova)
+```
+
+#CONCLUSION: podemos ver en el modelo que si existe una diferencia entre las variables precio y cont_rating ya que el 4+ es mas alto que los demas por ende no se rechaza la hipotesis nula y no se afirma la alternativa.
+
+#ANALISIS 3: Verificar la media del lang.num de las APPS, esto para verificar el promedio que las APPS tienden a tener.
+
+```{r}
+hist(AppleStore$lang.num,col="red")
+mediap <- mean(AppleStore$lang.num)
+medianap <-median(AppleStore$lang.num)
+abline(v=mediap,col="green")
+abline(v=medianap,col="blue")
+mediap
+medianap
+```
+
+#CONCLUSION: podemos ver que la media del lang.num de la AppleStore el tamaño de la media es de 5.434903 lo cual es el promedio de puntuacion que reciben las apps.
+
+#ANALISIS 4: Existe una posible relación entre las variables entre la calificacion de la apps (user_rating_ver) y el recuento de las calificaciones (rating_count_ver).
+
+#H0: existe una buena correlacion entre las variables
+#H1. no existe una buena correlacion entre las dos variables
+
+```{r}
+plot(AppleStore$user_rating_ver, AppleStore$rating_count_ver,col="blue",main="Correlacion",xlab="Calificacion de las Apps",ylab="Recuento de de las calificaciones")
+modelo1 <- lm(AppleStore$rating_count_ver ~ AppleStore$user_rating_ver)
+
+abline(modelo1,col="red")
+```
+
+#CONCLUSION: podemos ver que no existe una buena correlacion en los datos ya que teneindo todo el recuento de las apps podemos deducir que no se obtuvieron buenas calificaciones por ende se rechaza la hipotesis nula y se afirma la hipotesis alternativa.
+
+#ANALISIS 5: Verificar la media del recuento total de las calificaciones (rating_count_tot) de las apps de la Applestore para verificar cual es el promedio de las calificaciones.
+
+```{r}
+hist(AppleStore$rating_count_tot,col="red")
+mediar <- mean(AppleStore$rating_count_tot)
+medianar <-median(AppleStore$rating_count_tot)
+abline(v=mediar,col="green")
+abline(v=medianar,col="blue")
+mediar
+medianar
+```
+
+#CONCLUSION: podemos ver que la media de las apps de la AppleStore el tamaño de la media es de 12892.91 podemos deducir que se tiene un buen promedio de calificaciones total de la AppleStore.
+
+#ANALISIS 6: Verificar la media del tamaño de las APPS, esto para verificar el tamaño promedio que las APPS tienden a tener.
+
+```{r}
+hist(AppleStore$size_bytes,col="red")
+medides <- mean(AppleStore$size_bytes)
+mediana <-median(AppleStore$size_bytes)
+abline(v=medides,col="green")
+abline(v=mediana,col="blue")
+medides
+mediana
+```
+
+#CONCLUSION: Se observa que la media de las apps en relacion a tamaña es de 199134454 bytes, lo que significa que en mb es un total de 199.13 lo cual se puede decir que en la appstores encontraremos apps con un buen tamaño.
+
+#ANALSIS 7: VERIFICAR SI EL TAMAÑO DE LAS APPS AUMENTA SI ESTAS SON DE PAGA, ESTO PARA VER SI ES PREMIUM TENDRA MEJORES GRAFICOS O MEJORES OPNIONES DE USO
+
+#2 VARIABLES CUANTITATIVAS
+#size_bytes
+#price
+
+#GRAFICO DE CORRELACION
+#MODELO PEARSON 
+
+#H0= LAS APPS DE PAGA PESAN MAS
+#H1= LAS APPS DE PAGA PESAN MENOS
+
+```{r}
+plot(AppleStore$size_bytes,AppleStore$price) #variables numericas
+# crear un modelo lineal
+modelo1 <- lm(AppleStore$price ~ AppleStore$size_bytes)
+# graficar la linea
+abline(modelo1,col="red")
+
+#modelo para ver si existe correlacion
+cor(AppleStore$size_bytes, AppleStore$price, method = c("pearson"))
+```
+
+#CONCLUCION: GRAFICAMENTE SE OBSERVA QUE ES POCO LA RELACION ENTRE LAS VARIAVLES, EN EL MODELO QUE UTILIZAMOS AFIRMA QUE LA CORRELACION NO ES BUENA ENTONCES Se rechaza la h0 y se afirma la hipotesis alternativa
+
+#ANALSIS 8: VERIFICAR QUE GENERO PRINCIPAL TIENE PRECIOS MAS ALTOS DENTRO DE LA STORE
+
+#"prime_genre": género principal  #CUALITATIVA
+#"price": importe del precio     #CUANTITATIVA
+
+```{r}
+ggplot(data= AppleStore,aes(x=prime_genre,y=price,color=prime_genre))+geom_boxplot()+theme_bw()
+```
+
+#CONCLUCION: EL PRECIO MAS ALTO EN RELACION A PRECIO ES DEL GENERO productivity ESTE GENERO SE RELACIONA A JUEGOS GAMING, ENTORNOS DE DESARROLLO, PRECIO MAXIMO ES DE 100 $ EN ESTE CASO EN ESA MONEDA
+
+#ANALISIS 9: Verifique si a mayor precio la calificacion del usuario mejora, esto suponiendo que la aplicacion de paga es mucho mejor que las free
+
+#rating_count_tot   CUANTITATIVA
+#price              CUANTITATIVA
+
+#grafico  
+#modelo   
+
+#h0= A mayor precio la calificacion de los usuarios es alta
+#h1= A mayor precio la calificacion de los usuarios es baja
+
+```{r}
+plot(AppleStore$price,AppleStore$rating_count_tot,col="blue",main="Correlacion",xlab="precio",ylab="Rating")
+# crear un modelo lineal
+modelo1 <- lm(AppleStore$rating_count_tot ~ AppleStore$price)
+# graficar la linea
+abline(modelo1,col="red")
+
+cor(AppleStore$rating_count_tot, AppleStore$price, method = c("pearson"))
+```
+
+#CONCLUCION: Graficamente se ve que si existe correlacion pero no es nada buena y en el modelo utilizado(pearson) nos da una correlacion de 0.40 lo cual nos hace que se rechace la h0 y se afirme la h1, esto dando a entender que las apps de paga no aran que los usuarios esten satisfechos del todo
+
+#ANALISIS 10: ANALICE GRAFICAMENTE LA VARIVABLE DE VALOR PROMEDIO DE CALIFICACIÓN DE USUARIOS, VERIFICAR SI EXISTE NORMALIDAD EN LOS DATOS DE ESTA TAMBIEN VERIFIQUE LA MEDIA Y MEDIANA DE LA MISMA.
+
+#rating_count cuantitativa
+
+#grafico
+
+#user_rating
+
+```{r}
+hist(AppleStore$user_rating,col="red")
+medides <- mean(AppleStore$user_rating)
+mediana <-median(AppleStore$user_rating)
+abline(v=medides,col="green")
+abline(v=mediana,col="blue")
+mediana
+medides
+```
+
+#CONCLUSION: en el histograma utilizado se observa que no existe normalidad en los datos, luego se observa que esta sesgado a la derecha(los datos), se ve que la valoracion de 2 a 3 no tiene normalidad por lo que la mediana se encuentra en 4 por lo que se pude afirmar que la mayoria de usuarios estan satisfechos con el contenido de la appstore
+
+#ANALISIS 11: EXPLORE TANTO GRÁFICA COMO ANALÍTICAMENTE SI EXISTE DIFERENCIA ENTRE EL TIPO DE APPS Y EL PRECIO QUE ESTE TENGA, ESTO SUPONIENDO SI UNA APP ES DE ALGUN GENERO, SI ESTE VARIA SU PRECIO O SIMPLEMENTE TODAS VALEN POR IGUAL
+
+#price=         CUANTITATIVA
+#prime_genre=   CUALITATIVA
+#grafico=       BOXPLOT
+#MODELO=        anova
+#H0=EL PRECIO DEPENDE DEL GENERO
+#H1=EL PRECIO NO DEPENDE DEL GENERO
+
+```{r}
+cajas <- boxplot(price ~ prime_genre, data=AppleStore, col=c("green","red","blue"))
+str(cajas)
+
+anova<-aov(AppleStore$price ~ AppleStore$prime_genre)
+summary(anova)
+```
+
+2e-16<0.05
+#CONCLUCION: Graficamente se observa que efectivamente en algunos generos de contenido, el precio depende y mucho tal es el caso entretenimiento, es algo que me asombra porque el precio de este contenido es bajo a comparacion de los demas generos, y en el modelo no se rechaza la h0 por lo tanto el precio si depende del genero
+#Como el pvalue es mayor a 0.5 no se rechaza la hipotesis nula.
+
+#ANALISIS 12: GRAFICAR EL PRECIO DE LAS APPS, TRAZAR LA MEDIA DE ESTA, LUEGO VERIFICAR SI LAS APPS DE PAGA SON LO SUFICIENTEMENTE BUENAS PARA PAGAR POR ELLAS ESTO BASANDOSE POR LA VALORACION MEDIA DE LA VALORACIÓN DEL USUARIO
+
+#price              CUANTITATIVA
+
+```{r}
+hist(AppleStore$price,col="red")
+media <- mean(AppleStore$price)
+abline(v=medides,col="green")
+media
+```
+
+#CONCLUCION: la media del precio de las apps es de 1.726218 acordemonos que son en dolares esto dependera de la alta o baja del dolar.
+
+#ANALISIS 13: CON RELACION AL ANALISIS ANTERIOR, VERIFICAR SI LAS APPS DE PAGAN VALEN LA PENA ESTO EN RELACION A LA VALORACION QUE LOS USUARIOS LE DAN A LAS APPS
+
+#price              CUANTITATIVA
+#user_rating_ver    CUANTITATIVA
+
+#grafico      PLOT
+#modelo       PEARSON
+
+#h0= las apps de paga valen la pnea
+#h1= las apps de paga no valen la pena
+
+#Verificar si valen la pena
+
+```{r}
+plot(AppleStore$user_rating_ver,AppleStore$price,col="blue",main="Correlacion",xlab="VALORACION",ylab="Rating")
+# crear un modelo lineal
+modelo1 <- lm(AppleStore$price ~ AppleStore$user_rating_ver)
+# graficar la linea
+abline(modelo1,col="red")
+
+cor(AppleStore$user_rating_ver, AppleStore$price, method = c("pearson"))
+```
+
+#CONCLUCION: En el grafico se observa que la valoracion a las apps de paga es exactamente igual, esto se afirma con el modelo utilizado el cual nos dice que la correlacion con las variables se da muy poco el cual es de 0.02 el cual es casi inexitente, entonces se rechaza la h0 y entonces no vale la pena pagar por una app.
+
+#ANALISIS 14: VERIFICAR SI EXISTE CORRELACION ENTRE LAS VARIABLES PRICE Y lang.num, ESTO PARA VER SI LAS APPS DE PAGA TIENEN MAS IDIOMAS ADMITIDOS QUE LAS GRATUITAS
+
+#H0=EXISTE CORRELACION
+#H1=NO EXISTE CORRELACION
+#price
+#lang.num
+
+```{r}
+plot(AppleStore$lang.num,AppleStore$price) #variables numericas
+# crear un modelo lineal
+modelo1 <- lm(AppleStore$price ~ AppleStore$lang.num)
+# graficar la linea
+abline(modelo1,col="red")
+
+cor(AppleStore$lang.num, AppleStore$price, method = c("pearson"))
+```
+
+#CONCLUCION: LAS VARIBLES NO TIENEN CORRELACION ESTO BASADO A LA GRAFICA Y AL MODELO EL CUAL NOS DA UN RESULTADO DE -0.006 DE CORRELACION LA CUAL ES CASI INEXISTENTE LA RELACION DE LAS VARIABLES, ESTO ARROJANDONOS QUE LA VARIABLE PRICE NO TIENE CORRELACION CON LA MEJORA DE LAS APPS.
+
+#ANALISIS 15: ESTUDIE SI EXISTE RELACION ENTRE LA VIARIABLE (prime_genre ) Y LA VARIABLE (cont_rating), Esto para saber si el genero tiene que ver con las edades admitidas por los terminos y condiciones
+
+#ho= son variables independientes no hay relacion
+#h1= son variables independientes (si hay relacion)
+
+```{r}
+tabla <- table(AppleStore$prime_genre, AppleStore$cont_rating, dnn=c("GENERO DE JUEGO","CLASIFICACION DE EDAD"))
+tabla
+
+mosaicplot(tabla, main=deparse("Relacion de genero y edades"),col=c("green","red","blue"))
+
+chisq.test(tabla)
+```
+
+2.2e-16>0.05
+#CONCLUCION: GRAFICAMENTE Y ANALITAICAMENTE SE OBSERVA QUE LAS VARIABLES SI TIENEN RELACION POR ENDE NO SE RECHAZA LA H0, ESTO DANDO A ENTENDER QUE CADA GENERO TIENE LA EDAD DEFINIDA POR CADA GENERO Y EL GENERO QUE DEJA OBTENER LA APP CON MENOS EDAD ES DE GAMES (JUEGOS) ESTO POR EL ALTO CONTENIDO EDUCATIVO QUE OFRECEN.
+
+#ANALISIS DE COCHES USADOS
+
+#ANALISIS 1: analisar graficamente y analiticamente si el precio del vehiculo depende al tipo de combustible que este utilice, formule hiptesis
+
+#h0=El precio del vehiculo depende del tipo de combustible
+#h1=El precio del vehiculo no depende del tipo de combustible
+
+#price  CUANTITATIVA
+#fuel   CUALITATIVA
+
+```{r}
+ggplot(data= coches.de.segunda.mano.sample,aes(x=fuel,y=price,color=fuel))+geom_boxplot()+theme_bw()
+
+anova<-aov(coches.de.segunda.mano.sample$price~ coches.de.segunda.mano.sample$fuel)
+summary(anova)
+```
+
+2e-16<0.05
+
+#CONCLUCION: GRAFICAMENTE SE OBSERVA QUE EL PRECIO SI DEPENDE DEL TIPO DE COMBUSTIBLE QUE ESTE UTILICE, EL PRECIO MAS ALTO LO TIENE EL DE GASOLINA ESTO SE AFIRMA CON EL MODELO UTILIZADO EL CUAL QUE NOS DICE QUE LA H0 NO SE RECHAZA, ESTO PODRIA SER POR EL FACTOR QUE LA GASOLINA SIEMPRE SE MANTIENEN POR DEBAJO DE LOS PRECIOS DE OTROS COMBUSTIBLES, Y QUE ESTE TIPO DE VEHICULOS NO GASTAN MUCHOS GALONES POR MILLAS
+
+#ANALISIS 2: VERIFICAR SI QUE VEHICULOS TIENE MAS KILOMETRAJE, ESTO PARA VER SI LOS AUTOS DE DISEL O GASOLINA SON BASTANTE USADOS, BASANDONOS EN EL ANALISIS ANTERIOR SON CON LOS PRECIOS MAS ALTOS, PERO SERAN LOS MAS USADOS?
+
+#H0= LOS AUTOS MAS CAROS SON LOS MAS UTILIZADOS
+#H1= LOS AUTOS MAS BARATOS SON MENOS UTILIZADOS
+
+#kms  CUANTITATIVA
+#fuel CUALITATIVA
+
+```{r}
+ggplot(data= coches.de.segunda.mano.sample,aes(x=fuel,y=kms,color=fuel))+geom_boxplot()+theme_bw()
+anova<-aov(coches.de.segunda.mano.sample$kms~ coches.de.segunda.mano.sample$fuel)
+summary(anova)
+```
+
+2e-16<0.05
+#CONCLUCION: GRAFICAMENTE OBSERVAMOS QUE EFECTIVAMENTE LOS CARROS MAS CAROS SON MAS UTILIZADOS ESTO CON RELACION A LOS CARROS DE DISEL Y GASOLINA ESTO SE AFIRMO EN EL ANALISIS ANTERIOR, POR LO TANTO LA H0 NO SE RECHAZA
+
+#ANALISIS 3: SEGUIMOS ANALIZANDO LA VARIABLE FUEL(Tipo de combustible del veh?culo), analizar SI EL TIPO DE COMBUSTIBLE TIENE QUE VER CON LA POTENCIA QUE ESTE TENGA, ESPERO UNA POTENCIA BAJA EN RELACION A DISEL
+
+#power
+#fuel
+
+```{r}
+ggplot(data= coches.de.segunda.mano.sample,aes(x=fuel,y=power,color=fuel))+geom_boxplot()+theme_bw()
+anova<-aov(coches.de.segunda.mano.sample$power~ coches.de.segunda.mano.sample$fuel)
+summary(anova)
+```
+
+#CONCLUCION: EFECTIVAMNETE SE OBSERVA UNA BAJA DE POTENCIA EN RELACION AL VEHICULO DE DISEL E INCLUSO EL AUTO HIBRIDO TIENE UN MAXIMO DE POTENCIA MAS QUE DISEL ESTO TOMANDO EN CUENTA QUE LOS CARROS ELECTRICOS, NO TIENEN POTENCIA ALTA, PERO LOS AUTOS ELECTRICOS SI TIENE BUENA POTENCIA AL IGUAL QUE LOS VEHICULOS A GASOLINA
+
+#ANALISIS 4: ANALISAR LA VARIABLE FUEL, EN RELACION A LA VARIABLE shift, ESTO PARA VER QUE VEHICULOS EN SU MAYORIA SON MANUALES O AUTOMATICOS. 
+
+#fuel   CUALITATIVA
+#shift  CUANTITATIVA
+
+```{r}
+tabla <- table(coches.de.segunda.mano.sample$fuel, coches.de.segunda.mano.sample$shift, dnn=c("TIPO DE COMBUSTIBLE","MANUEL O AUTOMATICO"))
+tabla
+
+mosaicplot(tabla, main=deparse("Relacion TIPO DE VEHICULO"),col=c("green","red","blue"))
+```
+
+#CONCLUCION: SE OBSERVA EN LA GRAFICA CLARAMENTE LOS TIPOS DE VEHICULOS QUE SON EN SU MAYORIA MANUALES LOS CUALES SON DISEL Y GASOLINA ESTO ES UN CLARO EJEMPLO DE GUATEMALA EN SU MAYORIA LOS AUTOS SON MECANICOS POR EL HECHO QUE LOS DISEL Y GASOLINA VIENEN PARA TRABAJO DURO Y LAS CAJAS AUTOMATICAS IGUALMENTE SON MAS POTENTES , ESTO LO VERIFICAREMOS EN EL SIGUIENTE ANALISIS, LOS DEMAS LA MAYORIA SON AUTOMATICOS POR EL HECHO QUE SON PARA LA CIUDAD, PARA TRABAJO COTIDIANO
+
+#ANALISIS 5: VERIFICAR QUE TIPO DE TRANSMICION TIENE MAS POTENCIA (MANUAL O AUTOMATICO)
+
+#power  CUANTITATIVA
+#shift   CUALITATIVA
+
+```{r}
+ggplot(data= coches.de.segunda.mano.sample,aes(x=shift,y=power,color=shift))+geom_boxplot()+theme_bw()
+anova<-aov(coches.de.segunda.mano.sample$power~ coches.de.segunda.mano.sample$shift)
+summary(anova)
+```
+
+#CONCLUCION: SE VE QUE SI, LAS CAJAS AUTOMATICAS TIENEN MAS POTENCIAS, UN FACTOR ES QUE LAS REVOLUCIONES DE LA CAJA SUBEN MAS QUE LA MANUEL, LA CUAL DEPENDE DE NOSOTROS EN CAMBIO UNA CAJA AUTOMATICA VA REVOLUCIONANDO SEGUN LA PRECION QUE LE TENGAMOS, AUNQUE LAS CAJAS MANUALES NO SE QUEDAN ATRAS
+
+#ANALISIS 6: ANALICE si existe correlacion entre la variable year(a?o del vehiculo) y la variable kms.
+
+#H0= a?o mas reciente menos kms
+#H1= a?o mas reciente mas kms
+
+```{r}
+plot(coches.de.segunda.mano.sample$year,coches.de.segunda.mano.sample$kms) #variables numericas
+# crear un modelo lineal
+modelo1 <- lm(coches.de.segunda.mano.sample$kms ~ coches.de.segunda.mano.sample$year)
+# graficar la linea
+abline(modelo1,col="red")
+
+cor(coches.de.segunda.mano.sample$kms, coches.de.segunda.mano.sample$year, method = c("pearson"))
+```
+
+#CONCLUCION: Graficamente se observa que los autos recien salidos tienen poco kilometraje, esto es por el uso cada uno de ellos lo utiliza menos.
+
+#ANALISIS 7: construya un histograma de las fotos del coche por si es profesional o no el coche. Podría afirmar que los datos son normales?
+
+```{r}
+professionalphotos <- split(coches.de.segunda.mano.sample$photos,coches.de.segunda.mano.sample$is_professional)
+
+par(mfrow=c(2,1))
+
+hist(professionalphotos$False,col="blue")
+mediaf <- mean(professionalphotos$False)
+abline(v=mediaf,col="black")
+
+hist(professionalphotos$True,col="green")
+mediat <- mean(professionalphotos$True)
+abline(v=mediat,col="black")
+```
+
+#CONCLUSION: como se puede ver en los graficos se podria decir que los datos no son normales ya que existe una diferencia entre las fotos y si el auto es profesional podemos deducir de que mientras el auto tenga mas fotos se puede confirmar que es un coche profesional.
+
+#ANALISIS 8: analizar si existe una diferencia entre la variable is_professional y la shift.
+
+#H0: Existe diferencia entre el is_professional y el shift
+#H1: No existe diferencia entre el is_professional y el shift
+
+```{r}
+tabla1 <- table(coches.de.segunda.mano.sample$is_professional, coches.de.segunda.mano.sample$shift, dnn=c("is_professional","shift"))
+tabla1
+
+mosaicplot(tabla1, main=deparse("Relacion entre shift y is_professional"),col=c("green","red","blue"))
+
+chisq.test(tabla1)
+```
+
+#CONCLUSION: concluimos que segun el p-value no se rechaza la hipotesis nula y  no se afirma la alternativa pero como se puede ver en la grafica si existe una diferencia
+
+#ANALISIS 9: Existe una diferencia con el año y fuel.
+
+#H0: si existe una diferencia en el precio y cont_rating
+#H1: no existe diferencia en el precio y cont_rating
+
+```{r}
+ggplot(data= coches.de.segunda.mano.sample,aes(x=fuel,y=year,color=fuel))+geom_boxplot()+theme_bw()
+
+anova<-aov(coches.de.segunda.mano.sample$year ~ coches.de.segunda.mano.sample$fuel)
+summary(anova)
+```
+
+#CONCLUSION: podemos ver en el modelo que si existe una diferencia entre las variables año y fuel ya que la gasolina es mas alto que los demas por ende no se rechaza la hipotesis nula y no se afirma la alternativa.
+
+#ANALISIS 10: Existe una diferencia con el precio y is professional.
+
+#H0: si existe una diferencia en el precio y cont_rating
+#H1: no existe diferencia en el precio y cont_rating
+
+```{r}
+cajas <- boxplot(price ~ is_professional, data=coches.de.segunda.mano.sample, col=c("green","red","blue"))
+str(cajas)
+```
+
+#CONCLUSION: Podemos ver mediante el grafico que existe una diferencia notoria entre las variables por ende concluimos que la hipotesis nula no se rechaza y la alternativa no se afirma.
+
+#ANALISIS 11: Existe una posible relación entre las variables precio y precio finaciado de los coches.
+
+#H0: existe una buena correlacion entre las variables
+#H1. no existe una buena correlacion entre las dos variables
+
+```{r}
+plot(coches.de.segunda.mano.sample$price, coches.de.segunda.mano.sample$price_financed,col="blue",main="Correlacion",xlab="Precio Financiado",ylab="Precio")
+modelo1 <- lm(coches.de.segunda.mano.sample$price_financed ~ coches.de.segunda.mano.sample$price)
+
+abline(modelo1,col="red")
+```
+
+#CONCLUSION: por lo que podemos apreciar en el modelo es que existe una buena correlacion en los datos del precio y precio financiado por ende concluimos que la hipotesis nula no se rechaza y la alternativa no se afirma.
+
+#ANALISIS 12: Verificar la media de los kilometros por hora de los coches.
+
+```{r}
+hist(coches.de.segunda.mano.sample$kms,col="red")
+mediak <- mean(coches.de.segunda.mano.sample$kms)
+medianak <-median(coches.de.segunda.mano.sample$kms)
+abline(v=mediak,col="green")
+abline(v=medianak,col="blue")
+mediak
+medianak
+```
+
+#CONCLUSION: podemos ver que la media de los kilometros por hora de los coches el tamaño de la media es de 116359.1 lo cual es buena.
+
+#ANALISIS 13: Estudie si existe relacion entre la variable (shift) y la variable (fuel).
+
+#H0: Existe diferencia entre el los cambios y el combustible
+#H1: No existe diferencia entre el is_professional y el shift
+
+```{r}
+tabla <- table(coches.de.segunda.mano.sample$shift, coches.de.segunda.mano.sample$fuel, dnn=c("Cambios","Conbustible"))
+tabla
+
+mosaicplot(tabla, main=deparse("Relacion de cambios y conbustible"),col=c("green","red","blue", "pink", "yellow",'orange' ,'aquamarine1', 'beige'))
+
+chisq.test(tabla)
+```
+
+#CONCLUSION: como se puede apreciar en el modelo existe una diferencia notoria entre los diferentes tipos de combustible para los coches por ende no se rechaza la hipotesis nula y no se afirma la alternativa.
+
+#ANALISIS 14: Existe una posible relación entre las variables kilometros por hora y el poder del motor de los coches.
+
+#H0: existe una buena correlacion entre las variables
+#H1. no existe una buena correlacion entre las dos variables
+
+```{r}
+plot(coches.de.segunda.mano.sample$power, coches.de.segunda.mano.sample$kms,col="blue",main="Correlacion",xlab="Poder del motor",ylab="Kilometros por hora")
+modelo1 <- lm(coches.de.segunda.mano.sample$kms ~ coches.de.segunda.mano.sample$power)
+
+abline(modelo1,col="red")
+```
+
+#CONCLUSION: por lo que se puede apreciar en el modelo existe una buena correlacion entre las variables poder del motor y kilometros por hora por ende cocnluimos que la hipotesis nula no se rechaza y la alterantiva no se afirma.

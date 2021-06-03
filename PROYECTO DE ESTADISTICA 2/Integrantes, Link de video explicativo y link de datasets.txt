@@ -1,0 +1,12 @@
+INTEGRANTES 
+María Alejandra Osorio Alvarado 2490-19-2838 
+Samuel Rolando Martínez López 2490-19-17930 
+
+VIDEO EXPLICATIVO 
+https://drive.google.com/file/d/1aqBE2QZssr1qv8a-WsKPmfrtBme7oX8a/view?usp=sharing 
+
+ENLACE DE DATASET 
+COCHES USADOS 
+https://www.kaggle.com/datamarket/venta-de-coches
+APPSTORE
+https://www.kaggle.com/ramamet4/app-store-apple-data-set-10k-apps
